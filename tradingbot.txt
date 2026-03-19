@@ -1,0 +1,13 @@
+Ultimate Full Trading Bot body { background:#0d0d0d; color:white; font-family:Arial; text-align:center; } select, input, button { padding:10px; margin:10px; border-radius:5px; } .box { border:1px solid #333; padding:20px; margin:20px; border-radius:10px; } .buy { color:lime; font-size:2em; } .sell { color:red; font-size:2em; } .wait { color:yellow; font-size:2em; } 🔥 Ultimate Full Trading Bot 
+
+Enter Alpha Vantage API Key 
+Select Mode Binary Forex Select Platform Pocket Option Olymp Trade Select Trade Time 15 sec 30 sec 1 min 5 min Select Currency Pair EUR/USD GBP/USD USD/JPY BTC/USD ETH/USD XAU/USD AUD/USD NZD/USD USD/CAD USD/CHF 
+
+Select Forex Broker MetaTrader 4 MetaTrader 5 XM Exness FXTM OctaFX HotForex FBS IC Markets AvaTrade 
+
+
+Generate Signal 
+
+Pair: - Broker: - Pattern: None RSI: 0 SMA: 0 EMA: 0 MACD: 0 Support: - Resistance: - Signal: WAIT 
+
+async function fetchAlphaVantage(pair, apiKey){ let [from, to] = pair.split("/"); try{ let url = `https://www.alphavantage.co/query?function=FX_INTRADAY&from_symbol=${from}&to_symbol=${to}&interval=1min&outputsize=compact&apikey=${apiKey}`; let res = await fetch(url); let data = await res.json(); if(data['Time Series FX (1min)']){ let times = Object.keys(data['Time Series FX (1min)']); let candles = times.map(t=>{ let c = data['Time Series FX (1min)'][t]; return {time:t, open:parseFloat(c['1. open']), high:parseFloat(c['2. high']), low:parseFloat(c['3. low']), close:parseFloat(c['4. close'])}; }); return candles.reverse().slice(-20); } }catch(e){ console.error(e); } return null; } function calculateRSI(candles){ let gains=0, losses=0; for(let i=1;i0) gains+=diff; else losses-=diff; } let rs=gains/losses; return 100-(100/(1+rs)); } function calculateSMA(candles){ let sum=0; for(let c of candles) sum+=c.close; return sum/candles.length; } function calculateEMA(candles, period=10){ let k=2/(period+1); let ema=candles[0].close; for(let i=1;ic.low); let highs=candles.map(c=>c.high); return {support:Math.min(...lows).toFixed(5), resistance:Math.max(...highs).toFixed(5)}; } function detectPattern(c){ let body=Math.abs(c.open-c.close); let upper=c.high-Math.max(c.open,c.close); let lower=Math.min(c.open,c.close)-c.low; if(bodybody*2) return "Hammer"; if(upper>body*2) return "Shooting Star"; if(c.close>c.open) return "Bullish"; if(c.closesr.support) return "CALL"; if(pattern=="Shooting Star" && rsi>70 && last.closeema) return "CALL"; if(pattern=="Bearish" && rsi>60 && last.closeprev.close) return "BUY"; if(last.close ultimate_trading_bot.html
